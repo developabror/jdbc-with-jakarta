@@ -22,7 +22,7 @@ public class SignIn extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String dbAddress = getServletConfig().getInitParameter("db_address");
         req.setAttribute("sign", false);
-        req.getRequestDispatcher("views/auth.jsp").forward(req, resp);
+        req.getRequestDispatcher("views/index.jsp").forward(req, resp);
     }
 
 
