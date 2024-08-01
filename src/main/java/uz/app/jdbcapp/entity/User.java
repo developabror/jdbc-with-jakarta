@@ -2,6 +2,7 @@ package uz.app.jdbcapp.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
@@ -15,6 +16,7 @@ public class User {
     private String email;
     private String password;
     private String code;
+    private Role role;
     private Boolean hasConfirmed;
 
     public User(String name, String email, String password, Boolean hasConfirmed) {
@@ -22,5 +24,6 @@ public class User {
         this.email = email;
         this.password = password;
         this.hasConfirmed = hasConfirmed;
+        role = Role.USER;
     }
 }

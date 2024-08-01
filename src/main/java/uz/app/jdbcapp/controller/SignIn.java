@@ -1,13 +1,18 @@
 package uz.app.jdbcapp.controller;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebInitParam;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
+import uz.app.jdbcapp.entity.Role;
+import uz.app.jdbcapp.entity.User;
 import uz.app.jdbcapp.service.AuthService;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet("/sign-in")
 public class SignIn extends HttpServlet {
@@ -15,6 +20,7 @@ public class SignIn extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String dbAddress = getServletConfig().getInitParameter("db_address");
         req.setAttribute("sign", false);
         req.getRequestDispatcher("views/auth.jsp").forward(req, resp);
     }
@@ -22,8 +28,9 @@ public class SignIn extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (authService.signIn(req, resp)) {
-            req.getRequestDispatcher("/views/home.jsp").forward(req, resp);
-        }
+        authService.signIn(req, resp);
+            resp.sendRedirect("/home");
+
+
     }
 }

@@ -17,7 +17,8 @@
         welcome to home page dear <c:out value="${user.getName()}" />
     </c:when>
     <c:otherwise>
-        <h1>user doest exists</h1>
+        <h2><c:out value="${message}" /></h2>
+<a href="/sign-in">sign in</a>
     </c:otherwise>
 </c:choose>
 </body>

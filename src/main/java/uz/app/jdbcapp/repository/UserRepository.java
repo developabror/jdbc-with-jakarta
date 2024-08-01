@@ -5,6 +5,7 @@ import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import uz.app.jdbcapp.db.DatabaseConfigurations;
+import uz.app.jdbcapp.entity.Role;
 import uz.app.jdbcapp.entity.User;
 
 import java.sql.Connection;
@@ -18,10 +19,16 @@ import java.util.Optional;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserRepository {
     DatabaseConfigurations configurations = DatabaseConfigurations.getInstance();
-    private List<User> users = new ArrayList<>();
+
     Connection connection = configurations.connection();
 
+    @SneakyThrows
     public List<User> getUsers() {
+        @Cleanup Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("select * from users;");
+        ArrayList<User> users=new ArrayList<>();
+        while (resultSet.next())
+            users.add(getUser(resultSet));
         return users;
     }
 
@@ -39,13 +46,15 @@ public class UserRepository {
                     user.getId());
         } else {
             text = String
-                    .format("insert into users values('%s','%s','%s','%s','%s','%s');",
+                    .format("insert into users values('%s','%s','%s','%s','%s','%s','%s');",
                             user.getId(),
                             user.getName(),
                             user.getEmail(),
                             user.getPassword(),
                             user.getHasConfirmed(),
-                            user.getCode());
+                            user.getCode(),
+                            user.getRole().name()
+                    );
         }
         statement.execute(text);
 
@@ -66,14 +75,7 @@ public class UserRepository {
         @Cleanup Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("select * from users where email = '" + email + "'");
         if (resultSet.next()) {
-            User user = new User();
-            user.setId(resultSet.getString("id"));
-            user.setEmail(resultSet.getString("email"));
-            user.setName(resultSet.getString("name"));
-            user.setPassword(resultSet.getString("password"));
-            user.setHasConfirmed(resultSet.getBoolean("has_confirmed"));
-            user.setCode(resultSet.getString("code"));
-            return Optional.of(user);
+            return Optional.of(getUser(resultSet));
         }
         return Optional.empty();
 //        return users
@@ -81,8 +83,10 @@ public class UserRepository {
 //                .filter(user -> user.getEmail().equals(email))
 //                .findFirst();
     }
-
+    @SneakyThrows
     public void delete(String id) {
+        @Cleanup Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("update users set has_confirmed = false where id =  '" + id + "'");
 
     }
 
@@ -99,4 +103,26 @@ public class UserRepository {
         return userRepository;
     }
 
+    @SneakyThrows
+    public Optional<User> getUserById(String id) {
+        @Cleanup Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("select * from users where id = '" + id + "'");
+        if (resultSet.next()) {
+            User user = getUser(resultSet);
+            return Optional.of(user);
+        }
+        return Optional.empty();
+    }
+
+    private  User getUser(ResultSet resultSet) throws SQLException {
+        User user = new User();
+        user.setId(resultSet.getString("id"));
+        user.setEmail(resultSet.getString("email"));
+        user.setName(resultSet.getString("name"));
+        user.setPassword(resultSet.getString("password"));
+        user.setHasConfirmed(resultSet.getBoolean("has_confirmed"));
+        user.setRole(Role.valueOf(resultSet.getString("role")));
+        user.setCode(resultSet.getString("code"));
+        return user;
+    }
 }
